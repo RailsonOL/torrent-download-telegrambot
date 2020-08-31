@@ -1,2 +1,2 @@
-# webscraping-torrent-download
-  API que retorna dados de um site de Torrent
+# torrent-download-telegrambot
+ Bot que consome a API Torrent Download e retorna de forma interativa
