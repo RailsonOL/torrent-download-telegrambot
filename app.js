@@ -81,7 +81,7 @@ async function dataNormal(ctx, data, titulo, infos){
 
     let base64 = Buffer.from(epLink).toString('base64')
 
-    epLink = `http://${siteApi}/torrent/${base64}`
+    epLink = `${siteApi}/torrent/${base64}`
 
     arrEps1.push(Markup.urlButton(epName, epLink))
 
