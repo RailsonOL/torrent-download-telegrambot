@@ -1,0 +1,20 @@
+{
+  "name": "telegram-torrentbot",
+  "version": "1.0.0",
+  "description": "Bot do Telegram que usa minha API de Torrent Download para entregar de forma interativa",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [
+    "bot",
+    "telegram",
+    "api",
+    "torrent"
+  ],
+  "author": "RaiOL",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.20.0"
+  }
+}
