@@ -15,6 +15,7 @@
   "author": "RaiOL",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.20.0"
+    "axios": "^0.20.0",
+    "telegraf": "^3.38.0"
   }
 }
