@@ -4,7 +4,7 @@
   "description": "Bot do Telegram que usa minha API de Torrent Download para entregar de forma interativa",
   "main": "app.js",
   "scripts": {
-    "start": "node ./app.js"
+    "start": "node app.js"
   },
   "keywords": [
     "bot",
@@ -18,8 +18,5 @@
     "axios": "^0.20.0",
     "express": "^4.17.1",
     "telegraf": "^3.38.0"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.4"
   }
 }
