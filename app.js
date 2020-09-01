@@ -1,9 +1,5 @@
 const Telegraf = require('telegraf')
-const Markup = require('telegraf/markup')
 const axios = require('axios')
-//const express = require('express');
-//const app = express();
-
 
 const API_TOKEN = process.env.BOT_TOKEN
 const siteApi = process.env.SITE_URL
@@ -75,184 +71,69 @@ bot.command('p', async(ctx) => {
 
 })
 
-async function dataNormal(ctx, data, titulo, infos){
+function dataNormal(data){
 
-  let arrEps1 = []
+  var Eps = ''
+  var arrEps = []
 
   for(var i in data.eps.normal){
     
-    let epName = data.eps.normal[i].ep.replace(':','')
-    let epLink = data.eps.normal[i].link
-
-    if(epLink === undefined){ break }
-
-    let base64 = Buffer.from(epLink).toString('base64')
+    var epName = data.eps.normal[i].ep
+    var epLink = data.eps.normal[i].link
+    if(epLink != undefined){ var base64 = Buffer.from(epLink).toString('base64') }else{ var base64 = 'SEM_LINK' }
 
     epLink = `${siteApi}/torrent/${base64}`
 
-    arrEps1.push(Markup.urlButton(epName, epLink))
-
+    if (Number(i) == data.eps.normal.length-1){
+      Eps += `<b>${epName}</b> [ <a href="${epLink}">Baixar</a> ]\n\n`
+      arrEps.push(Eps)
+    }else if(Number.isInteger((Number(i)+1) / 2)){
+      arrEps.push(Eps)
+      Eps = ''
+      Eps += `<b>${epName}</b> [ <a href="${epLink}">Baixar</a> ]\n\n`
+    }else{
+      Eps += `<b>${epName}</b> [ <a href="${epLink}">Baixar</a> ]\n\n`
+    }
   }
 
-  let n1 = 0 
-  let n2 = 3
-
-  //console.log(arrEps)
-  ctx.reply(`<b>${titulo}</b>\n\n${infos}\n\n<b>${data.parte}</b>`, {
-    reply_markup: { inline_keyboard: [ arrEps1.slice(n1,n2), [{ text: '⬅', callback_data: 'voltar0', hide: false },{ text: '➡', callback_data: 'avancar0', hide: false }]] },
-    parse_mode: 'HTML'
-  })
-
-  bot.action('voltar0', async(ctx) => {
-    n1 -= 3
-    n2 -= 3
-    if (arrEps1.slice(n1,n2) && arrEps1.slice(n1,n2).length) {    
-      await ctx.editMessageReplyMarkup(
-        { inline_keyboard: [ arrEps1.slice(n1,n2), [{ text: '⬅', callback_data: 'voltar0', hide: false },{ text: '➡', callback_data: 'avancar0', hide: false }]] }
-            ) 
-   } else { 
-    n1 += 3
-    n2 += 3
-   } 
-  })
-
-  bot.action('avancar0', async(ctx) => {
-    
-    n1 += 3
-    n2 += 3
-    if (arrEps1.slice(n1,n2) && arrEps1.slice(n1,n2).length) {    
-      await ctx.editMessageReplyMarkup(
-        { inline_keyboard: [ arrEps1.slice(n1,n2), [{ text: '⬅', callback_data: 'voltar0', hide: false },{ text: '➡', callback_data: 'avancar0', hide: false }]] }
-            ) 
-   } else { 
-    n1 -= 3
-    n2 -= 3
-   }
-    
-  })
-
+  return arrEps
 }
 
-async function dataVariosLinks(ctx, data, titulo, infos){
+function dataVariosLinks(data){
 
-  let arrEps = []
-  let epsLinks = []
+  var Eps = ''
+  var arrEps = []
   for(var i in data.eps.variosLinks){
 
     let epName = data.eps.variosLinks[i].ep.replace('<b>','').replace('</b>','').replace('<br>','')
-    let dados = []
+    let dados = ''
 
     for(var ind in data.eps.variosLinks[i].links){
-
       let epLink = data.eps.variosLinks[i].links[ind].link
       let epValor = data.eps.variosLinks[i].links[ind].valor
-      epLink = `${siteApi}/torrent/${Buffer.from(epLink).toString('base64')}`
-      dados.push(Markup.urlButton(epValor, epLink))
-
+      if(epLink != undefined){ var base64 = Buffer.from(epLink).toString('base64') }else{ var base64 = 'SEM_LINK' }
+      epLink = `${siteApi}/torrent/${base64}`
+      dados += `[<a href="${epLink}"> ${epValor} </a>] `
     }
-    
-    epsLinks.push(dados)
 
-    arrEps.push(Markup.callbackButton(epName.replace(':',''), `ep-${i}`))
-
+    if (Number(i) == data.eps.variosLinks.length-1){
+      Eps += `<b>${epName}</b>: ${dados}\n\n`
+      arrEps.push(Eps)
+    }else if(Number.isInteger((Number(i)+1) / 2)){
+      arrEps.push(Eps)
+      Eps = ''
+      Eps += `<b>${epName}</b>: ${dados}\n\n`
+    }else{
+      Eps += `<b>${epName}</b>: ${dados}\n\n`
+    }
   }
-
-  let n1 = 0 
-  let n2 = 3
-
-  ctx.reply(`<b>${titulo}</b>\n\n${infos}\n\n<b>${data.parte}</b>`, {
-    reply_markup: { inline_keyboard: [ arrEps.slice(n1,n2), [{ text: '⬅', callback_data: 'voltar', hide: false },{ text: '➡', callback_data: 'avancar', hide: false }]] },
-    parse_mode: 'HTML'
-  })
-
-  bot.action('voltar', async(ctx) => {
-    n1 -= 3
-    n2 -= 3
-    if (arrEps.slice(n1,n2) && arrEps.slice(n1,n2).length) {    
-      await ctx.editMessageReplyMarkup(
-        { inline_keyboard: [ arrEps.slice(n1,n2), [{ text: '⬅', callback_data: 'voltar', hide: false },{ text: '➡', callback_data: 'avancar', hide: false }]] }
-            ) 
-   } else { 
-    n1 += 3
-    n2 += 3
-   } 
-  })
-
-  bot.action('avancar', async(ctx) => {
-    
-    n1 += 3
-    n2 += 3
-    if (arrEps.slice(n1,n2) && arrEps.slice(n1,n2).length) {    
-      await ctx.editMessageReplyMarkup(
-        { inline_keyboard: [ arrEps.slice(n1,n2), [{ text: '⬅', callback_data: 'voltar', hide: false },{ text: '➡', callback_data: 'avancar', hide: false }]] }
-            ) 
-   } else { 
-    n1 -= 3
-    n2 -= 3
-   }
-    
-  })
-
-//------------------------------------------------
-
-  let n3 = 0 
-  let n4 = 3
-
-  let index = ''
-  let nome = ''
-  bot.action(/^ep-/g, async(ctx) => {
-    index = ctx.match.input.replace('ep-','')
-    nome = arrEps[index].text
-
-    //console.log(ctx)
-
-    await ctx.editMessageText(`<b>${titulo}</b>\n\n${infos}\n\n<b>${data.parte}</b>\n<b>${nome}:</b>`, {
-      reply_markup: { inline_keyboard: [ epsLinks[index].slice(n3,n4), [{ text: '⬅', callback_data: 'voltar2', hide: false },{ text: '↩️ voltar', callback_data: 'voltartudo', hide: false },{ text: '➡', callback_data: 'avancar2', hide: false }]] },
-      parse_mode: 'HTML'
-    })
-  })
-
-  bot.action('voltar2', async(ctx) => {
-    n4 -= 3
-    n3 -= 3
-    if (epsLinks[index].slice(n3,n4) && epsLinks[index].slice(n3,n4).length) {    
-      await ctx.editMessageText(`<b>${titulo}</b>\n\n${infos}\n\n<b>${data.parte}</b>\n<b>${nome}:</b>`, {
-        reply_markup: { inline_keyboard: [ epsLinks[index].slice(n3,n4), [{ text: '⬅', callback_data: 'voltar2', hide: false },{ text: '↩️ voltar', callback_data: 'voltartudo', hide: false },{ text: '➡', callback_data: 'avancar2', hide: false }]] },
-        parse_mode: 'HTML'
-      })
-   } else { 
-    n3 += 3
-    n4 += 3
-   } 
-  })
-
-  bot.action('voltartudo', async(ctx) => {
-
-  ctx.editMessageText(`<b>${titulo}</b>\n\n${infos}\n\n<b>${data.parte}</b>`, {
-    reply_markup: { inline_keyboard: [ arrEps.slice(n1,n2), [{ text: '⬅', callback_data: 'voltar', hide: false },{ text: '➡', callback_data: 'avancar', hide: false }]] },
-    parse_mode: 'HTML'
-  })
-  })
-
-  bot.action('avancar2', async(ctx) => {
-    n3 -= 3
-    n4 -= 3
-
-    if (epsLinks[index].slice(n3,n4) && epsLinks[index].slice(n3,n4).length) {    
-      await ctx.editMessageText(`<b>${titulo}</b>\n\n${infos}\n\n<b>${data.parte}</b>\n<b>${nome}:</b>`, {
-        reply_markup: { inline_keyboard: [ epsLinks[index].slice(n3,n4), [{ text: '⬅', callback_data: 'voltar2', hide: false },{ text: '↩️ voltar', callback_data: 'voltartudo', hide: false },{ text: '➡', callback_data: 'avancar2', hide: false }]] },
-        parse_mode: 'HTML'
-      })
-   } else { 
-    n3 += 3
-    n4 += 3
-   } 
-  })
+  return arrEps
 }
 
 //-------------------------------------------------------
 
 bot.hears(/^@FilmesTorrent_bot \/baixar|\/baixar/g,  async(ctx) => {
+
   let response = ctx.match.input.split('/baixar ')
 
   let url = `${siteApi}/download/${response[1]}`
@@ -263,25 +144,103 @@ bot.hears(/^@FilmesTorrent_bot \/baixar|\/baixar/g,  async(ctx) => {
     const { data } = await axios.get(url)
   
       if(data.duasPartes === 1){
-    
-        if (data.parte1.variosLinks === 1){ //varios links de download
-          dataVariosLinks(ctx, data.parte1, data.titulo, data.infos)
-        }else{ //links de download unico
-          dataNormal(ctx, data.parte1, data.titulo, data.infos)
-        }
-        
-        if (data.parte2.variosLinks === 1){ //varios links de download
-          dataVariosLinks(ctx, data.parte2, data.titulo, data.infos)
-        }else{ //links de download unico
-          dataNormal(ctx, data.parte2, data.titulo, data.infos)
-        }
+        let callParteParte1 = data.parte1.parte
+        let callParteParte2 = data.parte2.parte
+        ctx.reply(`<b>Escolha uma das partes:</b>`, {
+          reply_markup: { inline_keyboard: [[{ text: callParteParte1, callback_data: 'call_parte1', hide: false },{ text: callParteParte2, callback_data: 'call_parte2', hide: false }]] },
+          parse_mode: 'HTML'
+        })      
+  
+        bot.action('call_parte1', (ctx) => {
+          if (data.parte1.variosLinks === 1){ //varios links de download
+
+            var arr = dataVariosLinks(data.parte1)
+            
+            ctx.reply(`<b>${data.titulo}</b>
+            ${data.infos}
+            <b>${data.parte1.parte}</b>`, { parse_mode: 'HTML' })
+
+            for(var i in arr){
+              if (arr[i] != ''){
+                ctx.reply(`${arr[i]}`, { parse_mode: 'HTML' })
+              }
+            }
+
+          }else{ //links de download unico
+            var arr = dataNormal(data.parte1)
+
+            ctx.reply(`<b>${data.titulo}</b>
+            ${data.infos}
+            <b>${data.parte1.parte}</b>`, { parse_mode: 'HTML' })
+
+            for(var i in arr){
+              if (arr[i] != ''){
+                ctx.reply(`${arr[i]}`, { parse_mode: 'HTML' })
+              }
+            }
+          }
+        })
+
+        bot.action('call_parte2', (ctx) => {
+
+          if (data.parte2.variosLinks === 1){ //varios links de download
+
+            var arr = dataVariosLinks(data.parte2)
+
+            ctx.reply(`<b>${data.titulo}</b>
+            ${data.infos}
+            <b>${data.parte2.parte}</b>`, { parse_mode: 'HTML' })
+
+            for(var i in arr){
+              if (arr[i] != ''){
+                ctx.reply(`${arr[i]}`, { parse_mode: 'HTML' })
+              }
+            }
+
+          }else{ //links de download unico
+            var arr = dataNormal(data.parte2)
+
+            ctx.reply(`<b>${data.titulo}</b>
+            ${data.infos}
+            <b>${data.parte2.parte}</b>`, { parse_mode: 'HTML' })
+
+            for(var i in arr){
+              if (arr[i] != ''){
+                ctx.reply(`${arr[i]}`, { parse_mode: 'HTML' })
+              }
+            }
+
+          }
+        })
     
       }else{
     
         if (data.parte1.variosLinks === 1){ //varios links de download
-          dataVariosLinks(ctx, data.parte1, data.titulo, data.infos)
+
+          var arr = dataVariosLinks(data.parte1)
+            
+          ctx.reply(`<b>${data.titulo}</b>
+          ${data.infos}
+          <b>${data.parte1.parte}</b>`, { parse_mode: 'HTML' })
+
+          for(var i in arr){
+            if (arr[i] != ''){
+              ctx.reply(`${arr[i]}`, { parse_mode: 'HTML' })
+            }
+          }
+
         }else{ //links de download unico
-          dataNormal(ctx, data.parte1, data.titulo, data.infos)
+          var arr = dataNormal(data.parte1)
+
+          ctx.reply(`<b>${data.titulo}</b>
+          ${data.infos}
+          <b>${data.parte1.parte}</b>`, { parse_mode: 'HTML' })
+
+          for(var i in arr){
+            if (arr[i] != ''){
+              ctx.reply(`${arr[i]}`, { parse_mode: 'HTML' })
+            }
+          }
         }
     
       }
