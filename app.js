@@ -1,9 +1,16 @@
 const Telegraf = require('telegraf')
 const Markup = require('telegraf/markup')
 const axios = require('axios')
+//const express = require('express');
+//const app = express();
 
-const bot = new Telegraf(process.env.BOT_TOKEN)
+
+const API_TOKEN = process.env.BOT_TOKEN
 const siteApi = process.env.SITE_URL
+const PORT = process.env.PORT
+const URL = process.env.URL
+
+const bot = new Telegraf(API_TOKEN)
 
 const helpMsg =   `Você pode usar os comando:
 /p - Pesquisar alguma coisa
@@ -292,4 +299,7 @@ bot.hears(/^@FilmesTorrent_bot \/baixar|\/baixar/g,  async(ctx) => {
   }
 })
 
-bot.launch()
+bot.telegram.setWebhook(`${URL}/bot${API_TOKEN}`);
+bot.startWebhook(`/bot${API_TOKEN}`, null, PORT)
+
+//bot.launch()
